@@ -8,33 +8,30 @@ function App() {
   const [plants, setPlants] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ Fetch plants from backend
+  // ✅ Fetch plants once at load
   useEffect(() => {
-    const fetchPlants = async () => {
-      try {
-        const res = await fetch("http://localhost:6001/plants");
-        if (!res.ok) throw new Error("Network response was not ok");
-        const data = await res.json();
-        setPlants(data);
-      } catch (err) {
-        console.error("❌ Error fetching plants:", err);
-      }
-    };
-
-    fetchPlants();
+    fetch("http://localhost:6001/plants")
+      .then((res) => res.json())
+      .then((data) => setPlants(data))
+      .catch((err) => console.error("❌ Error fetching plants:", err));
   }, []);
 
-  // 🔍 Filter logic (clean and reusable)
+  // 🔍 Filter plants by search term
   const filteredPlants = plants.filter((plant) =>
     plant.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // ➕ Add new plant
+  const handleAddPlant = (newPlant) => {
+    setPlants([...plants, newPlant]);
+  };
+
   return (
     <div className="app">
-      <Header title="🌿 Plantsy Admin Dashboard" />
+      <Header />
       <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <NewPlantForm plants={plants} setPlants={setPlants} />
-      <PlantList plants={filteredPlants} setPlants={setPlants} />
+      <NewPlantForm onAddPlant={handleAddPlant} />
+      <PlantList plants={filteredPlants} />
     </div>
   );
 }
